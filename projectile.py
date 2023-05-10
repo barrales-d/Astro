@@ -11,8 +11,8 @@ class Projectile(pygame.sprite.Sprite):
         self.type = type
         self.angle = angle
         self.scale = scale
-        if self.type == SPRITE_TYPE_ASTROID:
-            self.unrotated_image = pygame.transform.scale_by(pygame.image.load('./graphics/astroid.png').convert_alpha(), self.scale)
+        if self.type == SPRITE_TYPE_ASTEROID:
+            self.unrotated_image = pygame.transform.scale_by(pygame.image.load('./graphics/asteroid.png').convert_alpha(), self.scale)
         elif self.type == SPRITE_TYPE_BULLET:
             self.unrotated_image = pygame.transform.scale_by(pygame.image.load('./graphics/lazer.png').convert_alpha(), self.scale)
         
@@ -45,7 +45,7 @@ class Projectile(pygame.sprite.Sprite):
         self.unrotated_rect.x += self.dx
         self.unrotated_rect.y += self.dy
 
-        if self.type == SPRITE_TYPE_ASTROID:
+        if self.type == SPRITE_TYPE_ASTEROID:
             self.angle += self.dt * self.dt *  self.speed
             self.angle %= (2 * math.pi)
             self.rotate_image()

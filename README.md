@@ -1,4 +1,4 @@
-# Astro -- Astroid Clone in Python using Pygame
+# Astro -- Asteroid Clone in Python using Pygame
 
 
 

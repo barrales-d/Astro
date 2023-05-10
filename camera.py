@@ -9,12 +9,12 @@ class Camera(pygame.sprite.Group):
         self.h_width = wd / 2
         self.h_height = ht / 2
         self.offset = pygame.math.Vector2()
-        self.background = pygame.image.load('./graphics/astroid_background.png').convert_alpha()
+        self.background = pygame.image.load('./graphics/asteroid_background.png').convert_alpha()
         self.background_rect = self.background.get_rect(topleft = (0, 0))
 
 
-    def get_astroids(self):
-        return [sprite for sprite in self.sprites() if sprite.type == SPRITE_TYPE_ASTROID]
+    def get_asteroids(self):
+        return [sprite for sprite in self.sprites() if sprite.type == SPRITE_TYPE_ASTEROID]
     
     def get_bullets(self):
         return [sprite for sprite in self.sprites() if sprite.type == SPRITE_TYPE_BULLET]
