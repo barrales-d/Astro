@@ -1,0 +1,35 @@
+import pygame
+from settings import * 
+
+class Camera(pygame.sprite.Group):
+    def __init__(self, screen):
+        super().__init__()
+        self.screen = screen
+        wd, ht = self.screen.get_size()
+        self.h_width = wd / 2
+        self.h_height = ht / 2
+        self.offset = pygame.math.Vector2()
+        self.background = pygame.image.load('./graphics/astroid_background.png').convert_alpha()
+        self.background_rect = self.background.get_rect(topleft = (0, 0))
+
+
+    def get_astroids(self):
+        return [sprite for sprite in self.sprites() if sprite.type == SPRITE_TYPE_ASTROID]
+    
+    def get_bullets(self):
+        return [sprite for sprite in self.sprites() if sprite.type == SPRITE_TYPE_BULLET]
+    
+    def center_target(self, target):
+        self.offset.x = target.centerx - self.h_width
+        self.offset.y = target.centery - self.h_height
+
+    def draw_sprites(self, player_rect):
+        self.center_target(player_rect)
+                
+        bg_offset = self.background_rect.topleft - self.offset
+        self.screen.blit(self.background, bg_offset)
+
+        for sprite in self.sprites():
+            offset_pos = sprite.rect.topleft - self.offset
+            self.screen.blit(sprite.image, offset_pos)
+        
