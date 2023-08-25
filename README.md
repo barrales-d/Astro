@@ -8,7 +8,7 @@ $ ./py.exe main.py
 ```
 
 ## Screenshots
-### Purple planet
+### Rose planet
 ---
 ![Space](gameplay1.png)
 
