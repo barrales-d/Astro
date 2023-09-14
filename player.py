@@ -58,7 +58,7 @@ class Player(pygame.sprite.Sprite):
             self.unrotated_image =  self.shoot
         
         speed_boost = 1
-        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_LSHIFT]:
             speed_boost = 1.5
 
         if keys[pygame.K_w] or keys[pygame.K_UP]:

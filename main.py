@@ -2,7 +2,7 @@ import pygame
 from colors import *
 from settings import *
 from player import Player
-from projectile import Projectile
+from projectile import *
 from camera import Camera
 from random import randint, choice
 import math
@@ -15,6 +15,8 @@ class Game():
         pygame.display.set_caption('Astro')
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font('./font/Pixeltype.ttf', 60)
+        self.projectile_lazer = ProjectileKind(SPRITE_TYPE_BULLET, pygame.image.load('./graphics/lazer.png'), 2.3)
+        self.projectile_asteroid = ProjectileKind(SPRITE_TYPE_ASTEROID, pygame.image.load('./graphics/asteroid.png'), 1)
         self.running = True
         self.game_active = False
         self.delta_time = 0
@@ -37,8 +39,10 @@ class Game():
 
         self.camera = Camera(self.screen)
         self.camera.empty()
-        
-        self.player = Player((WIDTH // 2, HEIGHT // 2), self.camera)
+        if self.game_active:
+            self.player = Player((randint(100, WIDTH * 2), randint(100, HEIGHT * 2)), self.camera)
+        else:
+            self.player = Player((WIDTH / 2, HEIGHT / 2), self.camera)
 
     def display_text(self, pos, text):
         text_surface = self.font.render(text, False, white)
@@ -50,7 +54,8 @@ class Game():
         player_pos = pygame.math.Vector2(self.player.rect.center)
         angle = math.atan2(at_pos.y - player_pos.y , at_pos.x - player_pos.x)
         rand_speed = randint(100, 300)
-        Projectile(self.camera, scale, angle, at_pos, self.delta_time, rand_speed, SPRITE_TYPE_ASTEROID)
+        self.projectile_asteroid.scale = scale
+        Projectile(self.camera, at_pos, angle,  rand_speed, self.projectile_asteroid, self.delta_time)
     
     def spawn_rand_asteroid(self):
         player_pos = pygame.math.Vector2(self.player.rect.center)
@@ -69,7 +74,7 @@ class Game():
             
             if self.game_active:
                 if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_j or event.key == pygame.K_z):
-                    Projectile(self.camera, 2.3, self.player.angle, self.player.rect.center, self.delta_time, 800, SPRITE_TYPE_BULLET)
+                    Projectile(self.camera, self.player.rect.center, self.player.angle, 800, self.projectile_lazer, self.delta_time)
                     self.lazer_sound.play(0, 0, 200)
 
                 if event.type == self.asteroid_timer:
@@ -77,6 +82,7 @@ class Game():
             else:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     self.game_active = True
+                    self.reset()
     
     def asteroid_collision(self):
         asteroids = self.camera.get_asteroids()
@@ -94,17 +100,17 @@ class Game():
             if bullet_idx > 0:
                 bullets[bullet_idx].kill()
                 self.asteroid_death.play(0, 100, 0)
-                plus_score = int(10 *  (1 / asteroid.scale))
+                plus_score = int(10 *  (1 / asteroid.kind.scale))
                 self.score += plus_score
                 self.display_text(asteroid.rect.topleft - self.camera.offset, '+'+ str(plus_score))
 
-                if asteroid.scale > 0.9:
+                if asteroid.kind.scale > 0.9:
                     # spawn two asteroids
                     if choice([0, 0, 1]) == 0:
-                        self.spawn_asteroid(asteroid.scale * 0.9, asteroid.rect.center)
-                        self.spawn_asteroid(asteroid.scale * 0.9, asteroid.rect.center)
+                        self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
+                        self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
                     else:
-                        self.spawn_asteroid(asteroid.scale * 0.9, asteroid.rect.center)
+                        self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
                 
                 asteroid.kill() # this works! it deletes the object in self.camera.sprites()
     
@@ -125,7 +131,7 @@ class Game():
             else:
                 self.screen.blit(self.camera.background, self.camera.background_rect)
                 self.display_text((WIDTH // 2, HEIGHT // 6), 'ASTRO!!')
-                self.display_text((WIDTH // 2, HEIGHT // 4), '[W ARROW] to move forward,')
+                self.display_text((WIDTH // 2, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
                 self.display_text((WIDTH // 2, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
                 self.display_text((WIDTH // 2, HEIGHT // 4 + 100), 'J to fire lazer')
                 self.display_text((WIDTH // 2, HEIGHT * 4 // 5), 'Press space to start!')
