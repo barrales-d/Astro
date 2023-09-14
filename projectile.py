@@ -4,17 +4,22 @@ from settings import *
 from colors import *
 
 PROJECTILE_DESPAWN_TIMER = 10
-
-class Projectile(pygame.sprite.Sprite):
-    def __init__(self, group, scale, angle, pos, dt, speed, type):
-        super().__init__(group)
+class ProjectileKind():
+    def __init__(self, type, texture, scale):
         self.type = type
-        self.angle = angle
         self.scale = scale
+        self.texture = texture
+        
+class Projectile(pygame.sprite.Sprite):
+    def __init__(self, group, pos, angle, speed, kind, dt):
+        super().__init__(group)
+        self.angle = angle
+        self.kind = kind
+        self.type = self.kind.type
         if self.type == SPRITE_TYPE_ASTEROID:
-            self.unrotated_image = pygame.transform.scale_by(pygame.image.load('./graphics/asteroid.png').convert_alpha(), self.scale)
+            self.unrotated_image = pygame.transform.scale_by(self.kind.texture, self.kind.scale)
         elif self.type == SPRITE_TYPE_BULLET:
-            self.unrotated_image = pygame.transform.scale_by(pygame.image.load('./graphics/lazer.png').convert_alpha(), self.scale)
+            self.unrotated_image = pygame.transform.scale_by(self.kind.texture, self.kind.scale)
         
         self.unrotated_rect = self.unrotated_image.get_rect(center = pos)
         self.image = self.unrotated_image
