@@ -43,10 +43,7 @@ class Game():
 
         self.camera = Camera(self.screen)
         self.camera.empty()
-        if self.game_active:
-            self.player = Player((randint(100, WIDTH * 2), randint(100, HEIGHT * 2)), self.camera)
-        else:
-            self.player = Player((WIDTH / 2, HEIGHT / 2), self.camera)
+        self.player = Player((randint(100, self.camera.background.get_width()), randint(100, self.camera.background.get_height())), self.camera)
 
     def spawn_asteroid(self, scale, at_pos):
         at_pos = pygame.math.Vector2(at_pos)
@@ -58,7 +55,7 @@ class Game():
     
     def spawn_rand_asteroid(self):
         player_pos = pygame.math.Vector2(self.player.rect.center)
-        spawnwidth , spawnheight = WIDTH // 2 + 300, HEIGHT // 2 + 300 
+        spawnwidth , spawnheight = CENTER_SCREEN + 300, HEIGHT // 2 + 300 
         player_pad = self.player.rect.size[0]
         rand_x = randint(player_pos.x - spawnwidth + player_pad, player_pos.x + spawnwidth + player_pad)
         rand_y = randint(player_pos.y - spawnheight + player_pad, player_pos.y + spawnheight + player_pad)
@@ -120,20 +117,20 @@ class Game():
         bg_boundary = self.camera.background.get_bounding_rect()
         self.player.rect.clamp_ip(bg_boundary)
         self.camera.draw_sprites(self.player.rect)
-        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 6), f'Score: {self.score}')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 6), f'Score: {self.score}')
         
         self.game_active = self.asteroid_collision()
         self.bullet_collsion()
     
     def render_titlescreen(self):
         self.screen.blit(self.camera.background, self.camera.background_rect)
-        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 6), 'ASTRO!!')
-        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
-        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
-        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 4 + 100), '[J] to fire lazer')
-        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 6), 'ASTRO!!')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 100), '[J] to fire lazer')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
+        self.player.unrotated_rect.center = (CENTER_SCREEN, HEIGHT // 2)
         self.screen.blit(self.player.unrotated_image, self.player.unrotated_rect)
-        self.reset()
 
     def run(self):
         while self.running:

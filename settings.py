@@ -1,5 +1,6 @@
 # screen width and height
 WIDTH, HEIGHT = 1280, 720
+CENTER_SCREEN = WIDTH // 2
 
 SPRITE_TYPE_PLAYER  =   (1 << 0)
 SPRITE_TYPE_BULLET  =   (1 << 1)
