@@ -7,6 +7,10 @@ from camera import Camera
 from random import randint, choice
 import math
 
+def display_text(screen, font, pos, text):
+        text_surface = font.render(text, False, white)
+        text_rect = text_surface.get_rect(center = pos)
+        screen.blit(text_surface, text_rect)
 # game setup
 class Game():
     def __init__(self):
@@ -43,11 +47,6 @@ class Game():
             self.player = Player((randint(100, WIDTH * 2), randint(100, HEIGHT * 2)), self.camera)
         else:
             self.player = Player((WIDTH / 2, HEIGHT / 2), self.camera)
-
-    def display_text(self, pos, text):
-        text_surface = self.font.render(text, False, white)
-        text_rect = text_surface.get_rect(center = pos)
-        self.screen.blit(text_surface, text_rect)
 
     def spawn_asteroid(self, scale, at_pos):
         at_pos = pygame.math.Vector2(at_pos)
@@ -102,7 +101,7 @@ class Game():
                 self.asteroid_death.play(0, 100, 0)
                 plus_score = int(10 *  (1 / asteroid.kind.scale))
                 self.score += plus_score
-                self.display_text(asteroid.rect.topleft - self.camera.offset, '+'+ str(plus_score))
+                display_text(self.screen, self.font, asteroid.rect.topleft - self.camera.offset, '+'+ str(plus_score))
 
                 if asteroid.kind.scale > 0.9:
                     # spawn two asteroids
@@ -113,31 +112,36 @@ class Game():
                         self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
                 
                 asteroid.kill() # this works! it deletes the object in self.camera.sprites()
+
+    def render_gameplay(self):
+        self.screen.fill(black)
+
+        self.camera.update()
+        bg_boundary = self.camera.background.get_bounding_rect()
+        self.player.rect.clamp_ip(bg_boundary)
+        self.camera.draw_sprites(self.player.rect)
+        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 6), f'Score: {self.score}')
+        
+        self.game_active = self.asteroid_collision()
+        self.bullet_collsion()
     
+    def render_titlescreen(self):
+        self.screen.blit(self.camera.background, self.camera.background_rect)
+        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 6), 'ASTRO!!')
+        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
+        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
+        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT // 4 + 100), '[J] to fire lazer')
+        display_text(self.screen, self.font, (WIDTH // 2, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
+        self.screen.blit(self.player.unrotated_image, self.player.unrotated_rect)
+        self.reset()
+
     def run(self):
         while self.running:
             self.handle_events()
             if self.game_active:
-                self.screen.fill(black)
-
-                self.camera.update()
-                bg_boundary = self.camera.background.get_bounding_rect()
-                self.player.rect.clamp_ip(bg_boundary)
-                self.camera.draw_sprites(self.player.rect)
-                self.display_text((WIDTH // 2, HEIGHT // 6), f'Score: {self.score}')
-                
-                self.game_active = self.asteroid_collision()
-                self.bullet_collsion()
+                self.render_gameplay()
             else:
-                self.screen.blit(self.camera.background, self.camera.background_rect)
-                self.display_text((WIDTH // 2, HEIGHT // 6), 'ASTRO!!')
-                self.display_text((WIDTH // 2, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
-                self.display_text((WIDTH // 2, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
-                self.display_text((WIDTH // 2, HEIGHT // 4 + 100), 'J to fire lazer')
-                self.display_text((WIDTH // 2, HEIGHT * 4 // 5), 'Press space to start!')
-                self.screen.blit(self.player.unrotated_image, self.player.unrotated_rect)
-                self.reset()
-
+                self.render_titlescreen()
             pygame.display.update()
             self.delta_time = self.clock.tick(60) / 1000
         pygame.quit()
