@@ -19,7 +19,10 @@ class Game():
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Astro')
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font('./font/Pixeltype.ttf', 60)
+        self.title_font = pygame.font.Font('./font/Pixeltype.ttf', 80)
+        self.title_font.set_bold(True)
+        self.font60 = pygame.font.Font('./font/Pixeltype.ttf', 60)
+        self.font30 = pygame.font.Font('./font/Pixeltype.ttf', 30)
         self.projectile_lazer = ProjectileKind(SPRITE_TYPE_BULLET, pygame.image.load('./graphics/lazer.png'), 2.3)
         self.projectile_asteroid = ProjectileKind(SPRITE_TYPE_ASTEROID, pygame.image.load('./graphics/asteroid.png'), 1)
         self.running = True
@@ -100,7 +103,7 @@ class Game():
                 self.asteroid_death.play(0, 100, 0)
                 plus_score = int(10 *  (1 / asteroid.kind.scale))
                 self.score += plus_score
-                display_text(self.screen, self.font, asteroid.rect.topleft - self.camera.offset, '+'+ str(plus_score))
+                display_text(self.screen, self.font60, asteroid.rect.topleft - self.camera.offset, '+'+ str(plus_score))
 
                 if asteroid.kind.scale > 0.9:
                     # spawn two asteroids
@@ -114,12 +117,32 @@ class Game():
     
     def render_titlescreen(self):
         self.screen.blit(self.camera.background, self.camera.background_rect)
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 6), 'ASTRO!!')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 100), '[J] to fire lazer')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
-        self.player.unrotated_rect.center = (CENTER_SCREEN, HEIGHT // 2)
+        btn_width = 200
+        btn_height = 50
+        title_pos = (CENTER_SCREEN, HEIGHT // 6)
+        btn_center_x = title_pos[0] - btn_width // 2
+        btn_center_y = title_pos[1] + btn_height
+        pad = 10
+
+        display_text(self.screen, self.title_font, title_pos, 'A    S    T    R    O')
+        self.player.unrotated_rect.center = (CENTER_SCREEN, btn_center_y + pad * 4)
+        btn_center_y += self.player.unrotated_rect.h + pad
+        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Start')):
+            pass
+        btn_center_y += btn_height + pad
+        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Controls')):
+            pass
+        btn_center_y += btn_height + pad
+        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Settings')):
+            pass
+        btn_center_y += btn_height + pad
+        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Quit')):
+            self.running = False
+        btn_center_y += btn_height + pad
+        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
+        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
+        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 4 + 100), '[J] to fire lazer')
+        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
         self.screen.blit(self.player.unrotated_image, self.player.unrotated_rect)
 
 
@@ -130,7 +153,7 @@ class Game():
         bg_boundary = self.camera.background.get_bounding_rect()
         self.player.rect.clamp_ip(bg_boundary)
         self.camera.draw_sprites(self.player.rect)
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 6), f'Score: {self.score}')
+        display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 6), f'Score: {self.score}')
         
         self.game_active = self.asteroid_collision()
         self.bullet_collsion()

@@ -2,7 +2,7 @@ import pygame
 from colors import *
 from settings import *
 
-def createButton(screen, x, y, w, h, font, txt = ""):
+def createButton(screen, font, x, y, w, h, txt = ""):
     btn_rect = pygame.rect.Rect((x, y, w, h))
     mouse_pos = pygame.mouse.get_pos()
     hovered = btn_rect.collidepoint(mouse_pos)
