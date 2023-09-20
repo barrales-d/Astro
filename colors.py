@@ -17,3 +17,5 @@ turquoise =     (0x30, 0xD5, 0xC8)
 lightwhite =    (221, 221, 221)
 brown =         (150, 75, 25)
 
+BTN_COL =       (29, 41, 81)
+BTN_H_COL =     (48, 25, 52)

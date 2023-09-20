@@ -2,6 +2,7 @@ import pygame
 from colors import *
 from settings import *
 from player import Player
+from buttons import *
 from projectile import *
 from camera import Camera
 from random import randint, choice
@@ -36,7 +37,8 @@ class Game():
         self.lazer_sound = pygame.mixer.Sound('./music/laserpew.ogg')
 
         self.asteroid_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.asteroid_timer, 1000) 
+        pygame.time.set_timer(self.asteroid_timer, 1000)
+        
 
     def reset(self):
         self.score = 0
@@ -67,7 +69,7 @@ class Game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            
+
             if self.game_active:
                 if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_j or event.key == pygame.K_z):
                     Projectile(self.camera, self.player.rect.center, self.player.angle, 800, self.projectile_lazer, self.delta_time)
@@ -109,6 +111,17 @@ class Game():
                         self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
                 
                 asteroid.kill() # this works! it deletes the object in self.camera.sprites()
+    
+    def render_titlescreen(self):
+        self.screen.blit(self.camera.background, self.camera.background_rect)
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 6), 'ASTRO!!')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 100), '[J] to fire lazer')
+        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
+        self.player.unrotated_rect.center = (CENTER_SCREEN, HEIGHT // 2)
+        self.screen.blit(self.player.unrotated_image, self.player.unrotated_rect)
+
 
     def render_gameplay(self):
         self.screen.fill(black)
@@ -121,16 +134,6 @@ class Game():
         
         self.game_active = self.asteroid_collision()
         self.bullet_collsion()
-    
-    def render_titlescreen(self):
-        self.screen.blit(self.camera.background, self.camera.background_rect)
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 6), 'ASTRO!!')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT // 4 + 100), '[J] to fire lazer')
-        display_text(self.screen, self.font, (CENTER_SCREEN, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
-        self.player.unrotated_rect.center = (CENTER_SCREEN, HEIGHT // 2)
-        self.screen.blit(self.player.unrotated_image, self.player.unrotated_rect)
 
     def run(self):
         while self.running:
