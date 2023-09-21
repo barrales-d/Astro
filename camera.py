@@ -29,7 +29,12 @@ class Camera(pygame.sprite.Group):
         bg_offset = self.background_rect.topleft - self.offset
         self.screen.blit(self.background, bg_offset)
 
-        for sprite in self.sprites():
+        sprites = self.sprites()
+        for sprite_idx in range(1, len(sprites)):
+            sprite = sprites[sprite_idx]
             offset_pos = sprite.rect.topleft - self.offset
             self.screen.blit(sprite.image, offset_pos)
+        
+        self.screen.blit(sprites[0].image, sprites[0].rect.topleft - self.offset)
+        
         

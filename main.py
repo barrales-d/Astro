@@ -75,7 +75,7 @@ class Game():
                 self.running = False
 
             if self.state == STATE_PLAY:
-                if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_j or event.key == pygame.K_z):
+                if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_j):
                     Projectile(self.camera, self.player.rect.center, self.player.angle, 800, self.projectile_lazer, self.delta_time)
                     self.lazer_sound.play(0, 0, 200)
 
