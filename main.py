@@ -27,6 +27,7 @@ class Game():
         self.projectile_asteroid = ProjectileKind(SPRITE_TYPE_ASTEROID, pygame.image.load('./graphics/asteroid.png'), 1)
         self.running = True
         self.game_active = False
+        self.state = STATE_MENU
         self.delta_time = 0
         self.reset()
 
@@ -73,19 +74,15 @@ class Game():
             if event.type == pygame.QUIT:
                 self.running = False
 
-            if self.game_active:
+            if self.state == STATE_PLAY:
                 if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_j or event.key == pygame.K_z):
                     Projectile(self.camera, self.player.rect.center, self.player.angle, 800, self.projectile_lazer, self.delta_time)
                     self.lazer_sound.play(0, 0, 200)
 
                 if event.type == self.asteroid_timer:
-                    self.spawn_rand_asteroid()    
-            else:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    self.game_active = True
-                    self.reset()
-    
-    def asteroid_collision(self):
+                    self.spawn_rand_asteroid()
+
+    def handle_asteroid_collision(self):
         asteroids = self.camera.get_asteroids()
         if self.player.rect.collidelist(asteroids) < 0:
             return True
@@ -93,7 +90,7 @@ class Game():
         self.player_death.play(0, 0, 500)
         return False
     
-    def bullet_collsion(self):
+    def handle_bullet_collsion(self):
         asteroids = self.camera.get_asteroids()
         bullets = self.camera.get_bullets()
         for asteroid in asteroids:
@@ -116,33 +113,22 @@ class Game():
                 asteroid.kill() # this works! it deletes the object in self.camera.sprites()
     
     def render_titlescreen(self):
-        self.screen.blit(self.camera.background, self.camera.background_rect)
-        btn_width = 200
-        btn_height = 50
         title_pos = (CENTER_SCREEN, HEIGHT // 6)
-        btn_center_x = title_pos[0] - btn_width // 2
-        btn_center_y = title_pos[1] + btn_height
-        pad = 10
+        btn_center_x = title_pos[0] - BTN_WIDTH // 2
+        btn_center_y = title_pos[1] + BTN_HEIGHT
 
         display_text(self.screen, self.title_font, title_pos, 'A    S    T    R    O')
-        self.player.unrotated_rect.center = (CENTER_SCREEN, btn_center_y + pad * 4)
-        btn_center_y += self.player.unrotated_rect.h + pad
-        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Start')):
-            pass
-        btn_center_y += btn_height + pad
-        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Controls')):
-            pass
-        btn_center_y += btn_height + pad
-        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Settings')):
-            pass
-        btn_center_y += btn_height + pad
-        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, btn_width, btn_height, 'Quit')):
+        self.player.unrotated_rect.center = (CENTER_SCREEN, btn_center_y + BTN_PAD * 4)
+        btn_center_y += self.player.unrotated_rect.h + BTN_PAD
+        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, BTN_WIDTH, BTN_HEIGHT, 'Start')):
+            self.state = STATE_PLAY
+        btn_center_y += BTN_HEIGHT + BTN_PAD
+        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, BTN_WIDTH, BTN_HEIGHT, 'Controls')):
+            self.state = STATE_CONTROLS
+        btn_center_y += BTN_HEIGHT + BTN_PAD
+        if(createButton(self.screen, self.font30, btn_center_x, btn_center_y, BTN_WIDTH, BTN_HEIGHT, 'Quit')):
             self.running = False
-        btn_center_y += btn_height + pad
-        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 4), '[W ARROW] to move forward, [SHIFT] to boost')
-        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 4 + 50), '[A/D] to rotate left/right')
-        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 4 + 100), '[J] to fire lazer')
-        # display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT * 4 // 5), 'Press [SPACE] to start!')
+        btn_center_y += BTN_HEIGHT + BTN_PAD
         self.screen.blit(self.player.unrotated_image, self.player.unrotated_rect)
 
 
@@ -155,16 +141,41 @@ class Game():
         self.camera.draw_sprites(self.player.rect)
         display_text(self.screen, self.font60, (CENTER_SCREEN, HEIGHT // 6), f'Score: {self.score}')
         
-        self.game_active = self.asteroid_collision()
-        self.bullet_collsion()
+        # self.game_active = self.handle_asteroid_collision()
+        if not self.handle_asteroid_collision():
+            self.state = STATE_DEATH
+        self.handle_bullet_collsion()
+    
+    def render_death_screen(self):
+        pygame.time.delay(2000)
+        self.state = STATE_MENU
+
+    def render_controls(self):
+        UI_height = HEIGHT // 8
+        if(createButton(self.screen, self.font30, CENTER_SCREEN // 6, UI_height, BTN_WIDTH, BTN_HEIGHT, 'Back')):
+            self.state = STATE_MENU
+        UI_height = HEIGHT // 3
+        display_text(self.screen, self.font60, (CENTER_SCREEN, UI_height), '[W ARROW] to move forward, [SHIFT] to boost')
+        UI_height += BTN_HEIGHT + BTN_PAD
+        display_text(self.screen, self.font60, (CENTER_SCREEN, UI_height), '[A/D] to rotate left/right')
+        UI_height += BTN_HEIGHT + BTN_PAD
+        display_text(self.screen, self.font60, (CENTER_SCREEN, UI_height), '[J] to fire lazer')
 
     def run(self):
         while self.running:
             self.handle_events()
-            if self.game_active:
-                self.render_gameplay()
-            else:
+            self.screen.blit(self.camera.background, self.camera.background_rect)
+            if self.state == STATE_MENU:
                 self.render_titlescreen()
+            elif self.state == STATE_PLAY:
+                self.render_gameplay()
+            elif self.state == STATE_DEATH:
+                self.render_death_screen()
+            elif self.state == STATE_CONTROLS:
+                self.render_controls()
+            else: 
+                # UNREACHABLE
+                self.running = False
             pygame.display.update()
             self.delta_time = self.clock.tick(60) / 1000
         pygame.quit()
