@@ -5,6 +5,7 @@ from player import Player
 from buttons import *
 from projectile import *
 from camera import Camera
+from src.animator import *
 from random import randint, choice
 import math
 
@@ -23,8 +24,9 @@ class Game():
         self.title_font.set_bold(True)
         self.font60 = pygame.font.Font('./font/Pixeltype.ttf', 60)
         self.font30 = pygame.font.Font('./font/Pixeltype.ttf', 30)
-        self.projectile_lazer = ProjectileKind(SPRITE_TYPE_BULLET, pygame.image.load('./graphics/lazer.png'), 2.3)
-        self.projectile_asteroid = ProjectileKind(SPRITE_TYPE_ASTEROID, pygame.image.load('./graphics/asteroid.png'), 1)
+
+        self.projectile_manager = ProjectileManager()
+
         self.running = True
         self.game_active = False
         self.state = STATE_MENU
@@ -51,24 +53,6 @@ class Game():
         self.camera.empty()
         self.player = Player((randint(100, self.camera.background.get_width()), randint(100, self.camera.background.get_height())), self.camera)
 
-    def spawn_asteroid(self, scale, at_pos):
-        at_pos = pygame.math.Vector2(at_pos)
-        player_pos = pygame.math.Vector2(self.player.rect.center)
-        angle = math.atan2(at_pos.y - player_pos.y , at_pos.x - player_pos.x)
-        rand_speed = randint(100, 300)
-        self.projectile_asteroid.scale = scale
-        Projectile(self.camera, at_pos, angle,  rand_speed, self.projectile_asteroid, self.delta_time)
-    
-    def spawn_rand_asteroid(self):
-        player_pos = pygame.math.Vector2(self.player.rect.center)
-        spawnwidth , spawnheight = CENTER_SCREEN + 300, HEIGHT // 2 + 300 
-        player_pad = self.player.rect.size[0]
-        rand_x = randint(player_pos.x - spawnwidth + player_pad, player_pos.x + spawnwidth + player_pad)
-        rand_y = randint(player_pos.y - spawnheight + player_pad, player_pos.y + spawnheight + player_pad)
-        rand_pos = pygame.math.Vector2(rand_x, rand_y)
-        rand_scale = choice([1, 1, 1, 1.2])
-        self.spawn_asteroid(rand_scale, rand_pos)
-
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -76,11 +60,11 @@ class Game():
 
             if self.state == STATE_PLAY:
                 if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_j):
-                    Projectile(self.camera, self.player.rect.center, self.player.angle, 800, self.projectile_lazer, self.delta_time)
+                    self.projectile_manager.spawn_lazer(self.camera, self.player.rect.center, self.player.angle, 800, self.delta_time)
                     self.lazer_sound.play(0, 0, 200)
 
                 if event.type == self.asteroid_timer:
-                    self.spawn_rand_asteroid()
+                    self.projectile_manager.spawn_rand_asteroid(self.camera, self.player.rect.center, self.delta_time)
 
     def handle_asteroid_collision(self):
         asteroids = self.camera.get_asteroids()
@@ -98,17 +82,18 @@ class Game():
             if bullet_idx > 0:
                 bullets[bullet_idx].kill()
                 self.asteroid_death.play(0, 100, 0)
-                plus_score = int(10 *  (1 / asteroid.kind.scale))
+                plus_score = int(10 *  (1 / asteroid.scale))
                 self.score += plus_score
                 display_text(self.screen, self.font60, asteroid.rect.topleft - self.camera.offset, '+'+ str(plus_score))
 
-                if asteroid.kind.scale > 0.9:
+                if asteroid.scale > (SPRITE_SCALER / 2):
                     # spawn two asteroids
+                    new_scale = asteroid.scale - 1
                     if choice([0, 0, 1]) == 0:
-                        self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
-                        self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
+                        self.projectile_manager.spawn_asteroid(self.camera, new_scale, asteroid.rect.center, self.player.rect.center, self.delta_time)
+                        self.projectile_manager.spawn_asteroid(self.camera, new_scale, asteroid.rect.center, self.player.rect.center, self.delta_time)
                     else:
-                        self.spawn_asteroid(asteroid.kind.scale * 0.9, asteroid.rect.center)
+                        self.projectile_manager.spawn_asteroid(self.camera, new_scale, asteroid.rect.center, self.player.rect.center, self.delta_time)
                 
                 asteroid.kill() # this works! it deletes the object in self.camera.sprites()
     
@@ -149,6 +134,7 @@ class Game():
     def render_death_screen(self):
         pygame.time.delay(2000)
         self.state = STATE_MENU
+        self.reset()
 
     def render_controls(self):
         UI_height = HEIGHT // 8

@@ -7,22 +7,19 @@ from src.animator import *
 from random import randint, choice
 
 PROJECTILE_DESPAWN_TIMER = 10
-class ProjectileKind():
-    def __init__(self, type, texture, scale):
-        self.type = type
-        self.scale = scale
-        self.texture = texture
+# class ProjectileKind():
+#     def __init__(self, type, texture, scale):
+#         self.type = type
+#         self.scale = scale
+#         self.texture = texture
         
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, group, pos, angle, speed, kind, dt):
+    def __init__(self, group, pos, angle, speed, sprite, scale, kind, dt):
         super().__init__(group)
         self.angle = angle
-        self.kind = kind
-        self.type = self.kind.type
-        if self.type == SPRITE_TYPE_ASTEROID:
-            self.unrotated_image = pygame.transform.scale_by(self.kind.texture, self.kind.scale)
-        elif self.type == SPRITE_TYPE_BULLET:
-            self.unrotated_image = pygame.transform.scale_by(self.kind.texture, self.kind.scale)
+        self.type = kind
+        self.scale = scale
+        self.unrotated_image = pygame.transform.scale_by(sprite, self.scale)
         
         self.unrotated_rect = self.unrotated_image.get_rect(center = pos)
         self.image = self.unrotated_image
@@ -38,7 +35,7 @@ class Projectile(pygame.sprite.Sprite):
 
     def rotate_image(self):
         self.image = pygame.transform.rotate(self.unrotated_image, self.angle * 180 / math.pi)
-        self.image.set_colorkey(black)
+        self.image.set_colorkey(SPRITE_COLOR_KEY)
         self.rect.centerx = self.unrotated_rect.centerx - (self.image.get_width() // 2)
         self.rect.centery = self.unrotated_rect.centery - (self.image.get_height() // 2)
     
@@ -65,24 +62,25 @@ class Projectile(pygame.sprite.Sprite):
 
 class ProjectileManager:
     def __init__(self):
-        self.animtor = Animator('./graphics/asteroid_spritesheet_outline.png', 32, 1, 3, (0, 0))
+        self.__animtor = Animator('./graphics/asteroid_spritesheet_outline.png', 32, 1, 3, (0, 0))
 
-        self.animtor.add('asteroid1', 1, 1, 1)
-        self.animtor.add('asteroid2', 1, 2, 2)
-        self.animtor.add('asteroid3', 1, 3, 3)
+        self.__animtor.add('asteroid1', 1, 1, 1)
+        self.__animtor.add('asteroid2', 1, 2, 2)
+        self.__animtor.add('asteroid3', 1, 3, 3)
 
-        self.lazer_sprite = pygame.image.load('./graphics/lazer.png').convert_alpha()
+        self.__lazer_sprite = pygame.image.load('./graphics/lazer.png').convert_alpha()
 
     def spawn_asteroid(self, camera, scale, a_pos, player, dt):
         at_pos = pygame.math.Vector2(a_pos)
         player_pos = pygame.math.Vector2(player)
         angle = math.atan2(at_pos.y - player_pos.y , at_pos.x - player_pos.x)
         rand_speed = randint(100, 300)
+        if(scale > SPRITE_SCALER):
+            rand_speed = randint(80, 150)
         rand_sprite = choice(['asteroid1', 'asteroid2', 'asteroid3'])
-        self.animtor.play(rand_sprite)
+        self.__animtor.play(rand_sprite)
         
-        Projectile(camera, at_pos, angle,  rand_speed, scale)
-        Projectile(camera, at_pos, angle, rand_speed, scale, self.animtor.get_frame().image, SPRITE_TYPE_ASTEROID, dt)
+        Projectile(camera, at_pos, angle, rand_speed, self.__animtor.get_frame().image, scale, SPRITE_TYPE_ASTEROID, dt)
 
     def spawn_rand_asteroid(self, camera, player, dt):
         player_pos = pygame.math.Vector2(player)
@@ -90,5 +88,8 @@ class ProjectileManager:
         rand_x = randint(player_pos.x - spawnwidth, player_pos.x + spawnwidth)
         rand_y = randint(player_pos.y - spawnheight, player_pos.y + spawnheight)
         rand_pos = pygame.math.Vector2(rand_x, rand_y)
-        rand_scale = choice([1, 1, 1, 1.2])
+        rand_scale = choice([SPRITE_SCALER, SPRITE_SCALER, SPRITE_SCALER, SPRITE_SCALER*1.5])
         self.spawn_asteroid(camera, rand_scale, rand_pos, player, dt)
+
+    def spawn_lazer(self, camera, player_pos, angle, speed, dt):
+        Projectile(camera, player_pos, angle, speed, self.__lazer_sprite, SPRITE_SCALER, SPRITE_TYPE_BULLET, dt)
