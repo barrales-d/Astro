@@ -85,8 +85,8 @@ class ProjectileManager:
     def spawn_rand_asteroid(self, camera, player, dt):
         player_pos = pygame.math.Vector2(player)
         spawnwidth , spawnheight = CENTER_SCREEN + 300, HEIGHT // 2 + 300
-        rand_x = randint(player_pos.x - spawnwidth, player_pos.x + spawnwidth)
-        rand_y = randint(player_pos.y - spawnheight, player_pos.y + spawnheight)
+        rand_x = randint(int(player_pos.x - spawnwidth), int(player_pos.x + spawnwidth))
+        rand_y = randint(int(player_pos.y - spawnheight), int(player_pos.y + spawnheight))
         rand_pos = pygame.math.Vector2(rand_x, rand_y)
         rand_scale = choice([SPRITE_SCALER, SPRITE_SCALER, SPRITE_SCALER, SPRITE_SCALER*1.5])
         self.spawn_asteroid(camera, rand_scale, rand_pos, player, dt)

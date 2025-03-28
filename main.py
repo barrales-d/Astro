@@ -7,7 +7,6 @@ from projectile import *
 from camera import Camera
 from src.animator import *
 from random import randint, choice
-import math
 
 def display_text(screen, font, pos, text):
         text_surface = font.render(text, False, white)
@@ -162,7 +161,8 @@ class Game():
             else: 
                 # UNREACHABLE
                 self.running = False
-            pygame.display.update()
+            # pygame.display.update()
+            pygame.display.flip()
             self.delta_time = self.clock.tick(60) / 1000
         pygame.quit()
 
