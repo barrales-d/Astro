@@ -1,6 +1,6 @@
 import pygame
-from colors import *
-from settings import *
+from ..constants.colors import BTN_COL, BTN_H_COL, white
+from ..constants.settings import BTN_ROUNDED, MOUSE_BTN_1
 
 def createButton(screen, font, x, y, w, h, txt = ""):
     btn_rect = pygame.rect.Rect((x, y, w, h))
