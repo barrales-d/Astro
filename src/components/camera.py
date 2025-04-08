@@ -1,5 +1,5 @@
 import pygame
-from ..constants.settings import SPRITE_TYPE_ASTEROID, SPRITE_TYPE_BULLET
+from ..constants.settings import SPRITE_TYPE_ASTEROID, SPRITE_TYPE_BULLET, WIDTH, HEIGHT
 
 
 class Camera(pygame.sprite.Group):
@@ -42,3 +42,43 @@ class Camera(pygame.sprite.Group):
             self.screen.blit(sprite.image, offset_pos)
 
         self.screen.blit(sprites[0].image, sprites[0].rect.topleft - self.offset)
+
+
+class CameraNew(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+        self._on_awake()
+
+    def _on_awake(self):
+        self.offset = pygame.math.Vector2(0, 0)
+        self.background = pygame.image.load("./graphics/asteroid_background.png")
+
+    def on_start(self):
+        self.background = self.background.convert_alpha()
+        self.background_rect = self.background.get_rect(topleft=(0, 0))
+
+    def get_asteroids(self):
+        return [
+            sprite for sprite in self.sprites() if sprite.type == SPRITE_TYPE_ASTEROID
+        ]
+
+    def get_bullets(self):
+        return [
+            sprite for sprite in self.sprites() if sprite.type == SPRITE_TYPE_BULLET
+        ]
+
+    def center_target(self, targetx: float, targety: float):
+        self.offset.x = targetx - WIDTH / 2
+        self.offset.y = targety - HEIGHT / 2
+
+    def draw(self, screen: pygame.Surface):
+        # self.center_target(playerx, playery)
+
+        bg_offset = self.background_rect.topleft - self.offset
+        screen.blit(self.background, bg_offset)
+
+        sprites = self.sprites()
+        for sprite_idx in range(len(sprites) - 1, 0, -1):
+            sprite = sprites[sprite_idx]
+            offset_pos = sprite.rect.topleft - self.offset
+            screen.blit(sprite.image, offset_pos)
