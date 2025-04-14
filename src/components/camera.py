@@ -26,11 +26,10 @@ class Camera(pygame.sprite.Group):
         ]
 
     def center_target(self, target):
-        self.offset.x = target.centerx - self.h_width
-        self.offset.y = target.centery - self.h_height
+        self.offset.x = target[0] - self.h_width
+        self.offset.y = target[1] - self.h_height
 
-    def draw_sprites(self, player_rect):
-        self.center_target(player_rect)
+    def draw_sprites(self):
 
         bg_offset = self.background_rect.topleft - self.offset
         self.screen.blit(self.background, bg_offset)

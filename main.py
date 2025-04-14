@@ -188,10 +188,11 @@ class Game:
     def render_gameplay(self):
         self.screen.fill(black)
 
+        self.camera.center_target(self.player.unrotated_rect.center)
         self.camera.update()
         bg_boundary = self.camera.background.get_bounding_rect()
         self.player.rect.clamp_ip(bg_boundary)
-        self.camera.draw_sprites(self.player.rect)
+        self.camera.draw_sprites()
         display_text(
             self.screen,
             self.font60,
