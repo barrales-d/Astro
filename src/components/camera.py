@@ -1,5 +1,6 @@
 import pygame
-from ..constants.settings import SPRITE_TYPE_ASTEROID, SPRITE_TYPE_BULLET
+from ..constants.settings import SPRITE_TYPE_ASTEROID, SPRITE_TYPE_BULLET, WIDTH, HEIGHT
+from .util import clamp
 
 
 class Camera(pygame.sprite.Group):
@@ -12,7 +13,7 @@ class Camera(pygame.sprite.Group):
         self.offset = pygame.math.Vector2()
         self.background = pygame.image.load(
             "./graphics/asteroid_background.png"
-        ).convert_alpha()
+        ).convert()
         self.background_rect = self.background.get_rect(topleft=(0, 0))
 
     def get_asteroids(self):
@@ -26,11 +27,14 @@ class Camera(pygame.sprite.Group):
         ]
 
     def center_target(self, target):
-        self.offset.x = target[0] - self.h_width
-        self.offset.y = target[1] - self.h_height
+        self.offset.x = clamp(
+            target[0] - self.h_width, self.background_rect.left - 200, WIDTH * 2
+        )
+        self.offset.y = clamp(
+            target[1] - self.h_height, self.background_rect.top - 200, HEIGHT * 4
+        )
 
     def draw_sprites(self):
-
         bg_offset = self.background_rect.topleft - self.offset
         self.screen.blit(self.background, bg_offset)
 
