@@ -40,9 +40,11 @@ class Projectile(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(
             self.unrotated_image, self.angle * 180 / math.pi
         )
-        self.image.set_colorkey(SPRITE_COLOR_KEY)
+        self.image.convert_alpha()
+        # self.image.set_colorkey(SPRITE_COLOR_KEY)
         self.rect.centerx = self.unrotated_rect.centerx - (self.image.get_width() // 2)
         self.rect.centery = self.unrotated_rect.centery - (self.image.get_height() // 2)
+        self.mask = pygame.mask.from_surface(self.image)
 
     def destroy(self):
         if self.despawn_timer > 0:

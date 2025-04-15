@@ -87,8 +87,13 @@ class Game:
 
     def handle_asteroid_collision(self):
         asteroids = self.camera.get_asteroids()
-        if self.player.rect.collidelist(asteroids) < 0:
+        hit_player = self.player.rect.collidelist(asteroids)
+        if hit_player < 0:
             return True
+        else:
+            asteriod = asteroids[hit_player]
+            if pygame.sprite.collide_mask(self.player, asteriod) is None:
+                return True
 
         self.player_death.play(0, 0, 500)
         return False
